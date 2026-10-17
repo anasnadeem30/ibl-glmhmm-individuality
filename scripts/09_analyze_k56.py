@@ -1,0 +1,11 @@
+import sys, pathlib; sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+import pandas as pd, numpy as np, matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
+r=pd.concat([pd.read_csv('results/sweep_k.csv'),pd.read_csv('results/sweep_k56.csv')])
+m=r.groupby(['subject','K']).agg(ll=('test_ll','sum'),n=('n_test','sum')).reset_index(); m['bits']=m.ll/m.n/np.log(2)
+P=m.pivot(index='subject',columns='K',values='bits'); P.to_csv('results/sweep_k_summary.csv')
+print('mean held-out bits/trial:', P.mean().round(4).to_dict())
+print('gain vs previous K:', P.diff(axis=1).mean().round(4).dropna().to_dict())
+print('best K per mouse:', P.idxmax(axis=1).value_counts().sort_index().to_dict())
+for a,b in ((4,5),(5,6)): print(f'K={b} beats K={a} in', int((P[b]>P[a]).sum()),'of',len(P),'mice; median gain %.4f'%(P[b]-P[a]).median())
+fig,ax=plt.subplots(figsize=(5.5,4)); ax.plot(P.columns,P.T.values,color='gray',alpha=.4); ax.plot(P.columns,P.mean().values,'k',lw=3)
+ax.set_xlabel('number of states K'); ax.set_ylabel('held-out log-lik (bits/trial)'); plt.tight_layout(); plt.savefig('figures/choose_K.png',dpi=130)
