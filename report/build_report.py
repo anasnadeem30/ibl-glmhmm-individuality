@@ -71,7 +71,7 @@ S += [P('3. Methods', h1),
       P('<b>Baseline GLM.</b> One logistic regression per mouse predicting a right choice from signed contrast, previous choice (±1), win-stay-lose-switch (previous choice × previous outcome) and a bias term. '
         '<b>GLM-HMM.</b> K hidden states with a Markov transition matrix; in state k, P(right) = sigmoid(w<sub>k</sub> · x). Sessions are independent sequences. '
         'The fitting code (EM with scaled forward-backward in numba; the M-step is a weighted logistic regression per state with mild L2 regularization) was implemented for this project, not taken from an existing package. '
-        'A synthetic test with a known two-state model recovered the weights (6.18, 0.5, 2.0 against true 6, 0.5, 2.0), the transition probabilities (0.956 and 0.97 against 0.97 and 0.96) and the state on 92.8% of trials, and the likelihood never decreased across EM iterations. '
+        'A synthetic test with a known two-state model recovered the weights (6.19, 0.46, 2.03 against true 6, 0.5, 2.0), the stay probabilities of the two states (0.969 and 0.953 against true 0.97 and 0.96) and the state on 92.8% of trials, and the likelihood never decreased across EM iterations. '
         '<b>Evaluation.</b> All model comparisons use 5-fold cross-validation grouped by session, reporting held-out log-likelihood in bits per trial (0 is perfect; −1 is a coin flip). '
         'For each fit, the best of 3 to 5 random restarts by training likelihood was kept. States are compared across fits by one-to-one matching on weights (Hungarian algorithm). '
         'Main analyses use K=3; K=4 is a robustness check. Code: github repository, scripts 01 to 23.')]
@@ -93,12 +93,12 @@ S += [P('4. Results: hidden states and the number of states', h1),
 
 S += [P('5. A confound: block structure and the biased states', h1),
       P('My main fits use all trials but do not give the model the block (the 20/80 prior) as an input. Mice do track the block (Figure 1), so a "biased" state could simply be the mouse following the prior. '
-        'I tested this directly. For low-stimulus, side-biased states, occupancy was higher in the block favoring the state\'s side in 46 of 47 states at K=3 (mean +0.15, on a mean overall occupancy of 0.21) and in 54 of 58 at K=4. '
+        'I tested this directly. Taking "low-stimulus, side-biased" to mean a stimulus weight below 10 and a bias weight of magnitude above 1, occupancy was higher in the block favoring the state\'s side in 46 of 47 states at K=3 (mean +0.15, on a mean overall occupancy of 0.21) and in 54 of 58 at K=4. '
         'So part of what the model calls a biased state reflects block-following, not only disengagement. This likely accounts for part of the difference from Ashwood et al., and it is consistent with Mohammadi et al. finding left- and right-biased versions of engaged states in block data.'),
       fig('figures/block_control.png', 'Figure 4. Occupancy of side-biased states when the block favors the state\'s side (y) versus the other side (x). Points above the diagonal show the state follows the block.', 5.4)]
 
 S += [P('6. Closer replication of Ashwood et al.', h1),
-      P('To compare more directly with the original paper, I refitted using only the first 90 trials of each session (the 50/50 block; 138,559 trials, median 4,137 per mouse) and their input features (stimulus, bias, previous choice, previous stimulus side). '
+      P('To compare more directly with the original paper, I refitted using only the first 90 trials of each session (the 50/50 block; 138,559 trials, median 4,137 per mouse; Ashwood et al. required at least 3,000 trials per mouse, and 8 of my 33 mice fall below that, with a minimum of 2,694, since I applied no such exclusion) and their input features (stimulus, bias, previous choice, previous stimulus side). '
         'The 3-state model beat the 1-state model in 33 of 33 mice (+0.095 bits/trial; Ashwood et al.: +0.13). The gains per added state were 0.075, 0.020 and 0.008, so the curve flattens near three states as they reported, although 26 of 33 mice still preferred K=4 by a small margin. '
         'In the full-data K=3 fits, the median engaged occupancy was 59% (published: 69%), the median engaged dwell time was 22.8 trials (published: 24), and the other two states had medians of 17.8 and 6.9 trials (published: 13 and 12). '
         'In 24 of 33 mice the two non-engaged states had biases of opposite sign, as expected for biased-left and biased-right states.'),
