@@ -6,7 +6,7 @@ An independent re-analysis of public behavioral data from the International Brai
 
 ## Scope, stated plainly
 
-- This is a **replication with a small extension**, done on public data by one person. It is not peer reviewed and **I do not claim novelty**. Ashwood et al. (2022) already reported mouse-specific fits, and Mohammadi, Ashwood & Pillow (2025) analyze these data with a dynamic GLM-HMM.
+- The first part of this repository (the report in `report/`) is a **replication with a small extension**, done on public data by one person. It is not peer reviewed and **I do not claim novelty for it**. A second, separate analysis (see `history_baselines/` below) makes a more specific claim and is described as a preprint draft. Ashwood et al. (2022) already reported mouse-specific fits, and Mohammadi, Ashwood & Pillow (2025) analyze these data with a dynamic GLM-HMM.
 - The planned analysis of **drift across days was not completed**. I report only indirect observations, not tests.
 - The fitting code was validated on synthetic data, and every number in the report is produced by a script in this repository.
 
@@ -20,6 +20,24 @@ An independent re-analysis of public behavioral data from the International Brai
 | Is each mouse best predicted by its own model? | Yes: 33/33 (random session split) and 31/33 (early-train / late-test). Not a lab effect. A plain GLM shows it too, so hidden states are not required. Sharper in the random split (own model ranks 1st in 30/33 mice) than in the early/late split (9/33). |
 | Are the states reproducible? | Partly. Restarts reaching the same likelihood find the same states. Split-half fits of one mouse resemble each other more than other mice, but the nearest match is the same mouse in only 39-48% of cases (chance 3%). |
 | Number of states | Held-out score keeps improving through K=6 with shrinking gains. K=3 was chosen for interpretability, not because the score plateaued. |
+
+## New (Oct 2026): GLM-HMM vs stateless history baselines and a persistence control
+
+Folder `history_baselines/` (code, preprint draft in `history_baselines/paper/`) and `results/history_baselines/` (per-mouse results and a running analysis log).
+
+**Question.** How much of the GLM-HMM's held-out advantage over a plain GLM survives strong stateless baselines (action/stimulus/accuracy history kernels, time in session), and does the rest require temporal persistence of states, or only trial-to-trial mixing of response policies?
+
+| Result (33 mice, block trials, 5-fold session-grouped CV, bits/trial) | |
+|---|---|
+| Stateless history GLM (S2) recovers this share of the 3-state HMM's gain over the 4-input GLM | median 83% (IQR 72-92%) |
+| i.i.d. mixture of GLMs (no persistence) recovers this share of the remaining HMM gain | median 92% (IQR 85-97%) |
+| HMM minus i.i.d. mixture, full covariates | +0.005 (30/33 mice); +0.0026 to +0.0071 for K=2..5 |
+| Same difference on data simulated from a persistent HMM | +0.024 |
+| 4-input HMM minus mixture on purely *stateless* simulated data | +0.076 (apparent persistence from unmodelled history) |
+
+Scope and caveats: one dataset and task; trials after the first 90 of each session (a different subset from the Ashwood et al. 50/50 segment, so absolute numbers are not comparable; it also differs from the 1,154,948-trial count above because no-go trials were dropped here, leaving 1,149,100); one simulated replicate per mouse; K up to 5; hand-designed covariates; a drifting-weights (PsyTrack-style) comparator was not tested; wide-GLM optimiser convergence warnings were not quantified. This does not show that mice lack internal states.
+
+Run (from the repo root, after the pipeline above has produced `data/features.parquet`): `python history_baselines/full_ak.py all full_ak.csv` (and `pers_ctrl.py`, `sim_mix.py`, `ksweep.py`, each taking an output CSV name; the simulation and sweep take hours). `python history_baselines/make_figs.py` rebuilds the figures from `results/history_baselines/`. These scripts were run in the original working folder; only `make_figs.py` was re-run from this repository layout.
 
 ## Data
 
