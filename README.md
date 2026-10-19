@@ -27,7 +27,7 @@ Folder `history_baselines/` (code, preprint draft in `history_baselines/paper/`)
 
 **Question.** How much of the GLM-HMM's held-out advantage over a plain GLM survives strong stateless baselines (action/stimulus/accuracy history kernels, time in session), and does the rest require temporal persistence of states, or only trial-to-trial mixing of response policies?
 
-| Result (33 mice, block trials, 5-fold session-grouped CV, bits/trial) | |
+| Result (33 mice, 5-fold session-grouped CV, bits/trial) | |
 |---|---|
 | Stateless history GLM (S2) recovers this share of the 3-state HMM's gain over the 4-input GLM | median 83% (IQR 72-92%) |
 | i.i.d. mixture of GLMs (no persistence) recovers this share of the remaining HMM gain | median 92% (IQR 85-97%) |
@@ -35,7 +35,7 @@ Folder `history_baselines/` (code, preprint draft in `history_baselines/paper/`)
 | Same difference on data simulated from a persistent HMM | +0.024 |
 | 4-input HMM minus mixture on purely *stateless* simulated data | +0.076 (apparent persistence from unmodelled history) |
 
-Scope and caveats: one dataset and task; trials after the first 90 of each session (a different subset from the Ashwood et al. 50/50 segment, so absolute numbers are not comparable; it also differs from the 1,154,948-trial count above because no-go trials were dropped here, leaving 1,149,100); one simulated replicate per mouse; K up to 5; hand-designed covariates; a drifting-weights (PsyTrack-style) comparator was not tested; wide-GLM optimiser convergence warnings were not quantified. This does not show that mice lack internal states.
+Scope and caveats: one dataset and task; all trials after dropping no-go trials (1,149,100 of the 1,154,948 above), including the first 90 trials per session (50/50 prior, 12% of trials) and the later 20/80 blocks; Ashwood et al. analysed only the first-90-trial segment, so absolute numbers are not comparable; one simulated replicate per mouse; K up to 5; hand-designed covariates; a drifting-weights (PsyTrack-style) comparator was not tested; wide-GLM optimiser convergence warnings were not quantified. This does not show that mice lack internal states.
 
 Run (from the repo root, after the pipeline above has produced `data/features.parquet`): `python history_baselines/full_ak.py all full_ak.csv` (and `pers_ctrl.py`, `sim_mix.py`, `ksweep.py`, each taking an output CSV name; the simulation and sweep take hours). `python history_baselines/make_figs.py` rebuilds the figures from `results/history_baselines/`. These scripts were run in the original working folder; only `make_figs.py` was re-run from this repository layout.
 
